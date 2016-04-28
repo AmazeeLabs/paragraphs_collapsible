@@ -34,11 +34,15 @@
 }
 
 /*Collapse paragraphs by default*/
-.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr > td + td > div  > .form-wrapper > .paragraphs-subform {
+.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr > td > div > .form-wrapper > .paragraphs-subform,
+.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr > td > div.ajax-new-content > div > .form-wrapper > .paragraphs-subform
+{
   display: none;
 }
 
-.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr.expanded > td + td > div  > .form-wrapper > .paragraphs-subform {
+.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr.expanded > td > div > .form-wrapper > .paragraphs-subform,
+.field--widget-entity-reference-paragraphs .field-multiple-table > tbody > tr.expanded > td > div.ajax-new-content > div > .form-wrapper > .paragraphs-subform
+{
   display: block;
 }
 
