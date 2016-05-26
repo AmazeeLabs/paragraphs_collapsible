@@ -1,68 +1,94 @@
 (function ($) {
-    /**
-     * Paragraphs Drag&Drop functions
-     * */
-    Drupal.behaviors.paragraphs = {
-        attach: function (context, settings) {
-            paragraph_widget = '.field--widget-entity-reference-paragraphs'; /*Paragraph container*/
+  /**
+   * Paragraphs Drag&Drop functions
+   * */
+  Drupal.behaviors.paragraphs = {
+    attach: function (context, settings) {
+      var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
 
-            /*Set toggles*/
-            $(paragraph_widget + ' .field-multiple-table .field-label', context).each(function(){
-                if (!$(this).find('.paragraph-toggle').length) {
-                    $(this).append('<a class="paragraph-toggle">Collapse</a>');
-                }
-            });
+      /**
+       * Setting up all the toggler and reference attributes
+       * */
+      $('.field--widget-entity-reference-paragraphs table.field-multiple-table .field-label').each(function(paragraphIndex){
+        var $this = $(this);
 
-            /*Toggle function*/
-            $(paragraph_widget +' .paragraph-toggle', context).each(function(e){
-                $(this).click(function(e){
-                    e.preventDefault();
-                    id = '#' + $(this).parents('table').attr('id');
-                    draggable = id + ' > tbody > tr.draggable';
-                    $(paragraph_widget).toggleClass('collapsed-items');
-                    $(draggable).toggleClass('collapsed');
-                    if ( $(this).text() == 'Collapse' ) {
-                        $(this).text('Expand');
-                    } else {
-                        $(this).text('Collapse');
-                    }
-                });
-            });
+        // set reference attribute for the table
+        var $table = $this.parents('table.field-multiple-table').first();
+        $table.attr('data-paragraph-reference', paragraphIndex);
 
-            /*Check if user is dragging*/
-            $(paragraph_widget + ' .draggable .tabledrag-handle', context).mousedown(function(){
-                id = '#' + $(this).parents('table').attr('id');
-                draggable = paragraph_widget + ' ' + id + ' > tbody > tr.draggable';
-                $(draggable).addClass('collapsed');
+        $table.find('> tbody > tr').once('paragraph-item-once').each(function(paragraphRowIndex){
+          var $row = $(this),
+              character = '[+]';
 
-                /*Add id to current paragraph to scroll to it at the end*/
-                if ($(draggable + '.drag').attr('id')) {
-                    $(draggable + '.drag').removeAttr('id');
-                } else {
-                    $(draggable + '.drag').attr('id', 'edit-paragraph');
-                }
+          // set references for each row
+          $row.attr('data-row-reference', paragraphIndex + '-' + paragraphRowIndex);
 
-                $('html, body').animate({
-                    scrollTop: $("#edit-paragraph").offset().top - 500
-                }, 0);
-            });
+          // check for error elements
+          if ($row.find('.error').length || $row.find(' > td > .ajax-new-content').length) {
+            $row.addClass('expanded');
+            character = '[-]';
+          }
 
-            /*Check if user is finished dragging*/
-            if( $(paragraph_widget + ' .draggable').length ) {
-                $('body', context).mouseup(function(){
-                    if(!$(event.target).closest('.paragraph-toggle').length) {
-                        $(paragraph_widget).not('.collapsed-items').find('.draggable').removeClass('collapsed');
-                    }
+          // create toggler for each paragraph element
+          if ($row.find(paragraphGuide).find('+ .paragraphs-subform').length) {
+            $row.find(paragraphGuide).find('> .paragraph-type-title').once('paragraph-item-toggle-once').append('<a class="paragraph-item-toggle" data-row-reference="' + paragraphIndex + '-' + paragraphRowIndex + '">' + character + '</a>');
+          }
+        });
 
-                    /*Scroll to*/
-                    if( $('#edit-paragraph', context).length ) {
-                        $('html, body').animate({
-                            scrollTop: $("#edit-paragraph").offset().top - 100
-                        }, 0);
-                        $(paragraph_widget + ' .draggable').removeAttr('id');
-                    }
-                });
-            }
+        // create overarching toggler
+        var togglerText = 'Expand all';
+
+        if ($table.find('> tbody > tr').length <= 1 || ($table.find('> tbody > tr').length && $table.find('> tbody > tr.expanded').length)) {
+          togglerText = 'Collapse all';
         }
-    };
+
+        $this.once('paragraph-toggle-once').append('<a class="paragraph-toggle" data-paragraph-reference="' + paragraphIndex + '">' + Drupal.t(togglerText) + '</a>');
+      });
+
+      /**
+       * Complete paragraph toggler
+       * */
+      $('.paragraph-toggle', context).once('paragraph-rows-toggle').on('click', function(e){
+        e.preventDefault();
+
+        var $toggle = $(this),
+            $rows = $('tr[data-row-reference^="' + $toggle.attr('data-paragraph-reference') + '-"]');
+
+        if ($toggle.text() == 'Collapse all') {
+          $toggle.text(Drupal.t('Expand all'));
+          $rows.removeClass('expanded').find(paragraphGuide).find('> .paragraph-type-title .paragraph-item-toggle').text('[+]');
+        } else {
+          $toggle.text(Drupal.t('Collapse all'));
+          $rows.addClass('expanded').find(paragraphGuide).find('> .paragraph-type-title .paragraph-item-toggle').text('[-]');
+        }
+      });
+
+      /**
+       * Individual paragraph element toggler
+       * */
+      $('.paragraph-item-toggle', context).once('paragraph-row-toggle').on('click', function(e){
+        e.preventDefault();
+
+        var $toggle = $(this),
+            $row = $('tr[data-row-reference="' + $toggle.attr('data-row-reference') + '"]');
+
+        // expand / collapse row
+        $row.toggleClass('expanded');
+
+        // visually show expanded / collapsed
+        $toggle.text() == '[+]' ? $toggle.text('[-]') : $toggle.text('[+]');
+
+        // check if we expanded / collapsed all the rows
+        var $rowsToggler = $('table[data-paragraph-reference="' + $toggle.attr('data-row-reference').charAt(0) + '"]').find(' > thead .paragraph-toggle');
+
+        // change overarching toggler text when all row items are expanded / collapsed
+        if ($row.hasClass('expanded') && $row.siblings().length == $row.siblings('.expanded').length) {
+          $rowsToggler.text(Drupal.t('Collapse all'));
+        } else if ($row.siblings().length == $row.siblings(':not(.expanded)').length) {
+          $rowsToggler.text(Drupal.t('Expand all'));
+        }
+      });
+    }
+  };
+
 })(jQuery);
