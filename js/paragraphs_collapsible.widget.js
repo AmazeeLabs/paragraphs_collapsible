@@ -2,12 +2,37 @@
   /**
    * Paragraphs Drag&Drop functions
    * */
-  Drupal.behaviors.paragraphs = {
+  Drupal.behaviors.paragraphsCollapsibleWidget = {
     attach: function (context, settings) {
       var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
 
-      // Paragraph types where we show excerpt of text.
-      var excerptTypes = ['Text', 'Quote'];
+      function loadExcerption($row, textData) {
+        // Paragraph types where we show excerpt of text.
+        var excerptTypes = ['Text', 'Quote'];
+
+        $row.each(function() {
+          var thisType = $(this).find(paragraphGuide).find('> .paragraph-type-title > em').html();
+          if (jQuery.inArray(thisType, excerptTypes) != -1) {
+           if (textData == 'CKEDITOR') {
+             id = $(this).find('.paragraphs-subform textarea').attr('id');
+             textData = CKEDITOR.instances[id].getData();
+           }
+           else {
+             textData = $(this).find('.paragraphs-subform textarea').text();
+           }
+           textData = textData
+             .replace(/(<([^>]+)>)/ig, "")
+             .slice(0, 150) + '...';
+
+            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html(textData);
+          }
+        });
+      }
+
+      function updateExcerption($row) {
+        loadExcerption($row, 'CKEDITOR');
+      }
+
       /**
        * Setting up all the toggler and reference attributes
        * */
@@ -34,16 +59,11 @@
           // create toggler for each paragraph element
           if ($row.find(paragraphGuide).find('+ .paragraphs-subform').length) {
             $row.find(paragraphGuide).find('> .paragraph-type-title').once('paragraph-item-toggle-once').append('<a class="paragraph-item-toggle" data-row-reference="' + paragraphIndex + '-' + paragraphRowIndex + '">' + character + '</a>');
+            $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
+            loadExcerption($row);
           }
 
-          var thisType = $row.find(paragraphGuide).find('> .paragraph-type-title > em').html();
-          if (jQuery.inArray(thisType, excerptTypes) != -1) {
-            var stripString = $row.find('.paragraphs-subform textarea')
-                .text()
-                .replace(/(<([^>]+)>)/ig,"")
-                .slice(0, 150) + '...';
-            $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded">' + stripString + '</blockquote>');
-          }
+
         });
         
         // create overarching toggler
@@ -69,6 +89,7 @@
           $toggle.text(Drupal.t('Expand all'));
           $rows.removeClass('expanded').find(paragraphGuide).find('> .paragraph-type-title .paragraph-item-toggle').text('[+]');
           $rows.find('blockquote.excerpt').addClass('expanded');
+          updateExcerption($rows);
         } else {
           $toggle.text(Drupal.t('Collapse all'));
           $rows.addClass('expanded').find(paragraphGuide).find('> .paragraph-type-title .paragraph-item-toggle').text('[-]');
@@ -88,6 +109,9 @@
         // expand / collapse row
         $row.toggleClass('expanded');
         $row.find('blockquote.excerpt').toggleClass('expanded');
+        if ($row.find('blockquote.excerpt').hasClass('expanded')) {
+          updateExcerption($row);
+        }
 
         // visually show expanded / collapsed
         $toggle.text() == '[+]' ? $toggle.text('[-]') : $toggle.text('[+]');
