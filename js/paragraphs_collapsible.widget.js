@@ -5,11 +5,10 @@
   Drupal.behaviors.paragraphsCollapsibleWidget = {
     attach: function (context, settings) {
       var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
+      // Paragraph types where we show excerpt of text.
+      var excerptTypes = ['Text', 'Quote'];
 
       function loadExcerption($row, textData) {
-        // Paragraph types where we show excerpt of text.
-        var excerptTypes = ['Text', 'Quote'];
-
         $row.each(function() {
           var thisType = $(this).find(paragraphGuide).find('> .paragraph-type-title > em').html();
           if (jQuery.inArray(thisType, excerptTypes) != -1) {
@@ -59,8 +58,11 @@
           // create toggler for each paragraph element
           if ($row.find(paragraphGuide).find('+ .paragraphs-subform').length) {
             $row.find(paragraphGuide).find('> .paragraph-type-title').once('paragraph-item-toggle-once').append('<a class="paragraph-item-toggle" data-row-reference="' + paragraphIndex + '-' + paragraphRowIndex + '">' + character + '</a>');
-            $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
-            loadExcerption($row);
+            var thisType = $row.find(paragraphGuide).find('> .paragraph-type-title > em').html();
+            if (jQuery.inArray(thisType, excerptTypes) != -1) {
+              $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
+              loadExcerption($row);
+            }
           }
 
 
