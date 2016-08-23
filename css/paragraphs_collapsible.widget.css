@@ -106,3 +106,6 @@ blockquote.excerpt p {
 blockquote.excerpt.expanded {
   display: block;
 }
+.field--widget-entity-reference-paragraphs .ajax-new-content blockquote.excerpt {
+  display: none;
+}
