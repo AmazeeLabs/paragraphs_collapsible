@@ -6,13 +6,14 @@
     attach: function (context, settings) {
       var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
       // Paragraph types where we show excerpt of text.
-      var excerptTypes = ['Text', 'Quote'];
+      var excerptTypes = ['text', 'quote'];
 
       function loadExcerption($row, textData) {
         $row.each(function() {
-          var thisType = $(this).find(paragraphGuide).find('> .paragraph-type-title > em').html();
+          var thisType = $(this).find('.form-wrapper').attr('data-paragraphs-item-bundle');
           if (jQuery.inArray(thisType, excerptTypes) != -1) {
-           if (textData == 'CKEDITOR') {
+            $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
+            if (textData == 'CKEDITOR') {
              id = $(this).find('.paragraphs-subform textarea').attr('id');
              textData = CKEDITOR.instances[id].getData();
            }
@@ -59,10 +60,7 @@
           if ($row.find(paragraphGuide).find('+ .paragraphs-subform').length) {
             $row.find(paragraphGuide).find('> .paragraph-type-title').once('paragraph-item-toggle-once').append('<a class="paragraph-item-toggle" data-row-reference="' + paragraphIndex + '-' + paragraphRowIndex + '">' + character + '</a>');
             var thisType = $row.find(paragraphGuide).find('> .paragraph-type-title > em').html();
-            if (jQuery.inArray(thisType, excerptTypes) != -1) {
-              $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
-              loadExcerption($row);
-            }
+            loadExcerption($row);
           }
 
 

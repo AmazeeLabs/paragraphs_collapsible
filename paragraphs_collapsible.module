@@ -8,3 +8,16 @@ function paragraphs_collapsible_library_info_alter(&$libraries, $extension) {
     $libraries['drupal.paragraphs.admin']['dependencies'][] = 'paragraphs_collapsible/paragraphs_collapsible.widget';
   }
 }
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function paragraphs_collapsible_field_widget_entity_reference_paragraphs_form_alter(&$element, $form_state, $context) {
+  /** @var EntityReferenceRevisionsItem $item */
+  $item = $context['items'][$context['delta']];
+  $target = $item->getValue();
+  $target_id = $target['target_id'];
+  $paragraph = \Drupal\paragraphs\Entity\Paragraph::load($target_id);
+  $bundle = $paragraph->bundle();
+  $element['#attributes']['data-paragraphs-item-bundle'] = $bundle;
+}
