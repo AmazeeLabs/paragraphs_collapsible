@@ -12,7 +12,11 @@
         $row.each(function() {
           var thisType = $(this).find('.form-wrapper').attr('data-paragraphs-item-bundle');
           if (jQuery.inArray(thisType, excerptTypes) != -1) {
-            $row.find(paragraphGuide).find('> .paragraph-type-title').append('<blockquote class="excerpt expanded"></blockquote>');
+            var $element = $row.find(paragraphGuide).find('> .paragraph-type-title');
+            if ($row.find('.excerpt').length == 0) {
+              $element.append('<blockquote class="excerpt expanded"></blockquote>');
+            }
+
             if (textData == 'CKEDITOR') {
              id = $(this).find('.paragraphs-subform textarea').attr('id');
              textData = CKEDITOR.instances[id].getData();
@@ -22,9 +26,9 @@
            }
            textData = textData
              .replace(/(<([^>]+)>)/ig, "")
-             .slice(0, 150) + '...';
+             .slice(0, 50) + '...';
 
-            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html(textData);
+            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html('"' + textData);
           }
         });
       }
