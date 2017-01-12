@@ -18,17 +18,26 @@
             }
 
             if (textData == 'CKEDITOR') {
-             id = $(this).find('.paragraphs-subform textarea').attr('id');
-             textData = CKEDITOR.instances[id].getData();
-           }
-           else {
-             textData = $(this).find('.paragraphs-subform textarea').text();
-           }
-           textData = textData
-             .replace(/(<([^>]+)>)/ig, "")
-             .slice(0, 50) + '...';
+              id = $(this).find('.paragraphs-subform textarea').attr('id');
+              textData = CKEDITOR.instances[id].getData();
+            }
+            else {
+              textData = $(this).find('.paragraphs-subform textarea').text();
+            }
+            if (textData === '') {
+              // If still no excerpt found - try to get it from the first text
+              // input.
+              textData = $(this).find('.paragraphs-subform input[type="text"]').first().val();
+            }
+            textData = textData.replace(/(<([^>]+)>)/ig, '');
+            if (textData.length > 53) {
+              textData = '"' + textData.slice(0, 50) + '...';
+            }
+            else {
+              textData = '"' + textData + '"';
+            }
 
-            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html('"' + textData);
+            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html(textData === '""' ? '' : textData);
           }
         });
       }
