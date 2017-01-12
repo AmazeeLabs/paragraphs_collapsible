@@ -6,7 +6,7 @@
     attach: function (context, settings) {
       var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
       // Paragraph types where we show excerpt of text.
-      var excerptTypes = ['text', 'quote'];
+      var excerptTypes = ['text', 'quote', 'teaser', 'car_price_table_row'];
 
       function loadExcerption($row, textData) {
         $row.each(function() {
