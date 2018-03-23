@@ -40,14 +40,16 @@
       /**
        * Setting up all the toggler and reference attributes
        * */
-      $('.field--widget-entity-reference-paragraphs table.field-multiple-table .field-label').each(function(paragraphIndex){
-        var $this = $(this);
+      $('.field--widget-entity-reference-paragraphs table.field-multiple-table').each(function(paragraphIndex){
+        var $this = $(this); // set reference attribute for the table
 
-        // set reference attribute for the table
-        var $table = $this.parents('table.field-multiple-table').first();
-        $table.attr('data-paragraph-reference', paragraphIndex);
+        var $paragraphTitles = $this.find('.paragraph-type-title');
 
-        $table.find('> tbody > tr').once('paragraph-item-once').each(function(paragraphRowIndex){
+        if(!$paragraphTitles.length) {
+          return;
+        }
+
+        $this.find('> tbody > tr').once('paragraph-item-once').each(function(paragraphRowIndex){
           var $row = $(this),
               character = '[+]';
 
@@ -66,18 +68,16 @@
             var thisType = $row.find(paragraphGuide).find('> .paragraph-type-title > em').html();
             loadExcerption($row);
           }
-
-
         });
-        
+
         // create overarching toggler
         var togglerText = 'Expand all';
 
-        if ($table.find('> tbody > tr').length <= 1 || ($table.find('> tbody > tr').length && $table.find('> tbody > tr.expanded').length)) {
+        if ($this.find('> tbody > tr').length <= 1 || ($this.find('> tbody > tr').length && $this.find('> tbody > tr.expanded').length)) {
           togglerText = 'Collapse all';
         }
 
-        $this.once('paragraph-toggle-once').append('<a class="paragraph-toggle" data-paragraph-reference="' + paragraphIndex + '">' + Drupal.t(togglerText) + '</a>');
+        $this.find('.field-label').first().once('paragraph-toggle-once').append('<a class="paragraph-toggle" data-paragraph-reference="' + paragraphIndex + '">' + Drupal.t(togglerText) + '</a>');
       });
 
       /**
