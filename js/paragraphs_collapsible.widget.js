@@ -1,40 +1,147 @@
-(function ($) {
+(function($) {
   /**
    * Paragraphs Drag&Drop functions
    * */
   Drupal.behaviors.paragraphsCollapsibleWidget = {
-    attach: function (context, settings) {
-      var paragraphGuide = '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
-      // Paragraph types where we show excerpt of text.
-      var excerptTypes = ['text', 'quote'];
+    attach: function(context, settings) {
+      var paragraphGuide =
+        '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
 
-      function loadExcerption($row, textData) {
+      /**
+       * Trims, slices by 50 characters and appends ... to the data.
+       * @param {String} data
+       */
+      function trimData(data) {
+        return (
+          data
+            .trim()
+            .replace(/(<([^>]+)>)/gi, '')
+            .slice(0, 50) + '...'
+        );
+      }
+
+      /**
+       * Returns the value of the CKEDITOR if present.
+       * @param {Element} textarea
+       */
+      function getCKEDITORData(textarea) {
+        var id = textarea.attr('id');
+        return (
+          CKEDITOR &&
+          CKEDITOR.instances &&
+          CKEDITOR.instances[id] &&
+          CKEDITOR.instances[id].getData()
+        );
+      }
+
+      /**
+       * Returns the value/text of the element
+       * for each paragraph based on the type.
+       * @param {Element} paragraphRow
+       * @param {String} type
+       */
+      function getParagraphData(paragraphRow, type) {
+        var textData = '';
+        switch (type) {
+          case 'text':
+            var $textarea = paragraphRow.find('textarea.form-textarea');
+            var CKEDITORData = getCKEDITORData($textarea);
+            textData = CKEDITORData ? CKEDITORData : $textarea.text();
+            break;
+
+          case 'background_font':
+            textData = paragraphRow.find('input.form-text').val();
+            break;
+
+          case 'image':
+            textData = paragraphRow
+              .find('.media-image .field--name-name')
+              .text();
+            break;
+
+          case 'hero_teaser':
+            textData = paragraphRow
+              .find('.field--name-field-title input.form-text')
+              .val();
+            break;
+
+          case 'text_with_media':
+            textData = paragraphRow
+              .find('.media-image .field--name-name')
+              .text();
+            var textData1 = paragraphRow
+              .find('.teaser-entity-browser__admin-title')
+              .text();
+            textData = trimData(textData) + '<br />' + trimData(textData1);
+            break;
+
+          case 'text_highlight':
+            textData = paragraphRow.find('textarea.form-textarea').val();
+            break;
+
+          case 'quicklinks':
+            textData = paragraphRow
+              .find(
+                '.field--name-field-quicklinks-links .form-type-textfield .form-text',
+              )
+              .val();
+            break;
+
+          case 'data_table':
+            textData = paragraphRow.find('.label.form-wrapper').text();
+            break;
+
+          case 'text_highlight_with_image':
+            textData = paragraphRow
+              .find('.field--name-field-thwi-title input')
+              .val();
+            break;
+
+          case 'notification':
+            textData = paragraphRow
+              .find('.inline-entity-form-taxonomy_term-label')
+              .text();
+            break;
+
+          default:
+            break;
+        }
+
+        return textData;
+      }
+
+      /**
+       * Sets the content of each paragraph.
+       * @param {Array} row
+       * @param {String} type
+       */
+      function setContent(row, type) {
+        var $row = $(row);
+        var $element = $row
+          .find(paragraphGuide)
+          .find('> .paragraph-type-title');
+        var $paragraphRow = $row.find('.paragraphs-subform');
+
+        if ($row.find('.excerpt').length == 0) {
+          $element.append('<blockquote class="excerpt expanded"></blockquote>');
+        }
+
+        var text = getParagraphData($paragraphRow, type);
+        text = text.indexOf('<br />') > -1 ? text : trimData(text); // Needed for Image + Teaser to display both
+        $element.find('.excerpt').html('"' + text);
+      }
+
+      function loadExcerption($row) {
         $row.each(function() {
-          var thisType = $(this).find('.form-wrapper').attr('data-paragraphs-item-bundle');
-          if (jQuery.inArray(thisType, excerptTypes) != -1) {
-            var $element = $row.find(paragraphGuide).find('> .paragraph-type-title');
-            if ($row.find('.excerpt').length == 0) {
-              $element.append('<blockquote class="excerpt expanded"></blockquote>');
-            }
-
-            if (textData == 'CKEDITOR') {
-             id = $(this).find('.paragraphs-subform textarea').attr('id');
-             textData = CKEDITOR.instances[id].getData();
-           }
-           else {
-             textData = $(this).find('.paragraphs-subform textarea').text();
-           }
-           textData = textData
-             .replace(/(<([^>]+)>)/ig, "")
-             .slice(0, 50) + '...';
-
-            $(this).find(paragraphGuide).find('> .paragraph-type-title .excerpt').html('"' + textData);
-          }
+          var paragraphType = $(this)
+            .find('.form-wrapper')
+            .attr('data-paragraphs-item-bundle');
+          setContent($row, paragraphType);
         });
       }
 
       function updateExcerption($row) {
-        loadExcerption($row, 'CKEDITOR');
+        loadExcerption($row);
       }
 
       /**
