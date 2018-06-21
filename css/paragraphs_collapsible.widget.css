@@ -88,15 +88,10 @@ blockquote.excerpt {
   margin: 0;
   display: none;
 }
-blockquote.excerpt:before {
 
-}
 blockquote.excerpt p {
   display: inline;
 }
 blockquote.excerpt.expanded {
   display: block;
-}
-.field--widget-entity-reference-paragraphs .ajax-new-content blockquote.excerpt {
-  display: none;
 }

@@ -8,15 +8,14 @@
         '> td > div > .form-wrapper > .paragraph-type-top, > td > div.ajax-new-content > div > .form-wrapper > .paragraph-type-top';
 
       /**
-       * Trims, slices by 50 characters and appends ... to the data.
+       * Trims, if characters are more than 50, slices
+       * by 50 characters and appends ... to the data.
        * @param {String} data
        */
       function trimData(data) {
+        data = data.trim().replace(/(<([^>]+)>)/gi, '');
         return (
-          data
-            .trim()
-            .replace(/(<([^>]+)>)/gi, '')
-            .slice(0, 50) + '...'
+          '"' + (data.length > 50 ? data.slice(0, 50) + '...' : data + '"')
         );
       }
 
@@ -82,7 +81,7 @@
           case 'quicklinks':
             textData = paragraphRow
               .find(
-                '.field--name-field-quicklinks-links .form-type-textfield .form-text',
+                '.field--name-field-quicklinks-links .form-type-textfield .form-text'
               )
               .val();
             break;
@@ -121,14 +120,19 @@
           .find(paragraphGuide)
           .find('> .paragraph-type-title');
         var $paragraphRow = $row.find('.paragraphs-subform');
-
-        if ($row.find('.excerpt').length == 0) {
-          $element.append('<blockquote class="excerpt expanded"></blockquote>');
-        }
-
         var text = getParagraphData($paragraphRow, type);
-        text = text.indexOf('<br />') > -1 ? text : trimData(text); // Needed for Image + Teaser to display both
-        $element.find('.excerpt').html('"' + text);
+
+        if (text) {
+          text = text.indexOf('<br />') > -1 ? text : trimData(text); // Needed for Image + Teaser to display both
+
+          if ($row.find('.excerpt').length == 0) {
+            $element.append(
+              '<blockquote class="excerpt expanded"></blockquote>'
+            );
+          }
+
+          $element.find('.excerpt').html(text);
+        }
       }
 
       function loadExcerption($row) {
