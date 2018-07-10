@@ -102,6 +102,12 @@
               .text();
             break;
 
+          case 'contact_person':
+            textData = paragraphRow
+              .find('.form-type-textfield .form-text')
+              .val();
+            break;
+
           default:
             break;
         }
