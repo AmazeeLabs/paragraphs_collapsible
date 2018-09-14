@@ -1,3 +1,5 @@
+#This is now on https://www.drupal.org/project/paragraphs_collapsible
+
 # Collapsible plugin for paragraphs widget
 
 Improves the Paragraphs widget by applying CSS tweaks and collapsible feature
