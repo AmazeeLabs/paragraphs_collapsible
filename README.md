@@ -1,21 +1,19 @@
-#This is now on https://www.drupal.org/project/paragraphs_collapsible
-
-# Collapsible plugin for paragraphs widget
+# Collapsible plugin for Paragraphs widget
 
 Improves the Paragraphs widget by applying CSS tweaks and collapsible feature
 
 # Install
 
-Add the module using git modules:
+Add the module using composer:
 
 ```bash
-git submodule add git@github.com:AmazeeLabs/paragraphs_collapsible.git \
-  modules/custom/paragraphs_collapsible/
+composer require drupal/paragraphs_collapsible
 ```
 
-Enable it:
+Enable it with drush:
 
 ```bash
 drush en paragraphs_collapsible -y
 ```
 No configuration required.
+
