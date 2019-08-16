@@ -82,3 +82,16 @@
 .paragraph-item-toggle {
   margin-left: 5px;
 }
+
+/*Excerpt from text*/
+blockquote.excerpt {
+  margin: 0;
+  display: none;
+}
+
+blockquote.excerpt p {
+  display: inline;
+}
+blockquote.excerpt.expanded {
+  display: block;
+}
